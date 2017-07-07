@@ -72,6 +72,10 @@ export function linkify(text) {
   return text.replace(urlPattern, "$1<a href='$2' target='_blank'>$2</a>");
 }
 
+export function imgify(text) {
+  return text.replace(urlPattern, "$1<img src='$2' />");
+}
+
 export function remove(items, item) {
   if (items === undefined) {
     return items;
