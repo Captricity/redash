@@ -27,6 +27,11 @@ function formatValue($filter, clientConfig, value, type) {
         formattedValue = value.format(clientConfig.dateTimeFormat);
       }
       break;
+    case 'image':
+      if (isString(value)) {
+        formattedValue = $filter('imgify')(value);
+      }
+      break;
     default:
       if (isString(value)) {
         formattedValue = $filter('linkify')(value);
