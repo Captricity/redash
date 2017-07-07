@@ -1,0 +1,6 @@
+import os
+
+
+APPLICATION_BUCKET_MAP_YAML_PATH = os.environ.get('APPLICATION_BUCKET_MAP_YAML_PATH', None)
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', None)
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', None)
