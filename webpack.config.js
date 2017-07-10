@@ -15,7 +15,7 @@ var config = {
   output: {
     path: path.join(__dirname, 'client', 'dist'),
     filename: '[name].js',
-    publicPath: '/'
+    publicPath: '/redash'
   },
 
   plugins: [
