@@ -9,6 +9,7 @@ from flask import redirect, request, jsonify, url_for
 from redash import models, settings
 from redash.authentication.org_resolving import current_org
 from redash.authentication import google_oauth, saml_auth, remote_user_auth
+from redash.authentication.jwt import load_user_from_jwt
 from redash.tasks import record_event
 
 login_manager = LoginManager()
@@ -154,6 +155,8 @@ def setup_authentication(app):
         login_manager.request_loader(hmac_load_user_from_request)
     elif settings.AUTH_TYPE == 'api_key':
         login_manager.request_loader(api_key_load_user_from_request)
+    elif settings.AUTH_TYPE == 'jwt':
+        login_manager.request_loader(load_user_from_jwt)
     else:
         logger.warning("Unknown authentication type ({}). Using default (HMAC).".format(settings.AUTH_TYPE))
         login_manager.request_loader(hmac_load_user_from_request)

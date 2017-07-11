@@ -43,7 +43,7 @@ import registerVisualizations from './visualizations';
 import markdownFilter from './filters/markdown';
 import dateTimeFilter from './filters/datetime';
 
-import { configureHttpProvider } from './utils/api';
+import configureHttpProvider from './utils/api';
 
 const logger = debug('redash');
 
