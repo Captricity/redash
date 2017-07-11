@@ -3,6 +3,7 @@ import debug from 'debug';
 const logger = debug('redash:auth');
 const SESSION_ITEM = 'session';
 const session = { loaded: false };
+const JWT_ITEM = 'jwt';
 
 function storeSession(sessionData) {
   logger('Updating session to be:', sessionData);
@@ -29,9 +30,10 @@ function AuthService($window, $location, $q, $http) {
       return sessionData.loaded && sessionData.user.id;
     },
     login() {
+      // TODO (Yori) How to get next to work properly?
       const next = encodeURI($location.url());
       logger('Calling login with next = %s', next);
-      window.location.href = `login?next=${next}`;
+      window.location.href = `/login?next=${next}`;
     },
     logout() {
       logger('Logout.');
@@ -103,14 +105,29 @@ function apiKeyHttpInterceptor($injector) {
   };
 }
 
+function jwtHttpInterceptor() {
+  return {
+    request(config) {
+      const jwt = window.sessionStorage.getItem(JWT_ITEM);
+      if (jwt) {
+        config.headers.Authorization = `Bearer ${jwt}`;
+      }
+
+      return config;
+    },
+  };
+}
+
 export default function (ngModule) {
   ngModule.factory('Auth', AuthService);
   ngModule.service('currentUser', CurrentUserService);
   ngModule.service('clientConfig', ClientConfigService);
   ngModule.factory('apiKeyHttpInterceptor', apiKeyHttpInterceptor);
+  ngModule.factory('jwtHttpInterceptor', jwtHttpInterceptor);
 
   ngModule.config(($httpProvider) => {
     $httpProvider.interceptors.push('apiKeyHttpInterceptor');
+    $httpProvider.interceptors.push('jwtHttpInterceptor');
   });
 
   ngModule.run(($location, $window, $rootScope, $route, Auth) => {
