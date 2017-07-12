@@ -1,23 +1,32 @@
 from __future__ import absolute_import
 
-import jwt
+import requests
 from redash import models
 from redash.authentication.org_resolving import current_org
 
 
-def parse_authorization(authorization):
-    try:
-        bearer_kwd, raw_jwt_token = authorization.split(' ')
-    except ValueError:
+def get_user_info_from_authorization(authorization):
+    from redash_captricity_customizations import config
+    # Retrieve the user info using the authorization token
+    response = requests.get(
+        config.USER_SERVICE_URL,
+        headers={
+            'Authorization': authorization,
+            'Content-Type': 'application/json'
+        })
+    if response.status_code != requests.codes.ok:
         return None
 
-    if bearer_kwd != 'Bearer':
+    user_info = response.json()
+    return user_info
+
+
+def authorize_user(user_info):
+    if user_info is None:
         return None
 
-    # TODO (Yori) Maybe we should verify the token one more time?
-    jwt_token = jwt.decode(raw_jwt_token, verify=False)  # NOTE: No need to verify because it is verified by Kong
-    email = jwt_token['email']
-    name = jwt_token['name']
+    email = user_info['email']
+    name = user_info['first_name'] + ' ' + user_info['last_name']
     user = models.User.query.filter_by(email=email).first()
     if user:
         return user
@@ -36,4 +45,5 @@ def parse_authorization(authorization):
 
 
 def load_user_from_jwt(request):
-    return parse_authorization(request.headers.get('Authorization', ''))
+    user_info = get_user_info_from_authorization(request.headers.get('Authorization', ''))
+    return authorize_user(user_info)
