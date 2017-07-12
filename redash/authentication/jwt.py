@@ -32,11 +32,14 @@ def authorize_user(user_info):
         return user
     else:
         # Create user
+        group_ids = [current_org.default_group.id]
+        if user_info['is_staff']:
+            group_ids.append(current_org.admin_group.id)
         user = models.User(
             org=current_org,
             name=name,
             email=email,
-            group_ids=[current_org.default_group.id])
+            group_ids=group_ids)
         models.db.session.add(user)
         models.db.session.commit()
         return user
