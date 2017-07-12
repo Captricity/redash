@@ -1,6 +1,6 @@
 /* Utilities for accessing the api */
 
-const API_ROOT = '/redash/';
+export const API_ROOT = '/redash/';
 
 
 function httpPrefixInterceptor($q) {

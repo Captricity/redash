@@ -1,4 +1,5 @@
 import debug from 'debug';
+import { API_ROOT } from '../utils/api';
 
 const logger = debug('redash:auth');
 const SESSION_ITEM = 'session';
@@ -30,8 +31,11 @@ function AuthService($window, $location, $q, $http) {
       return sessionData.loaded && sessionData.user.id;
     },
     login() {
-      // TODO (Yori) How to get next to work properly?
-      const next = encodeURI($location.url());
+      let next = encodeURI($location.url());
+      if (next[0] === '/') {
+        next = next.substr(1);
+      }
+      next = API_ROOT + next;
       logger('Calling login with next = %s', next);
       window.location.href = `/login?next=${next}`;
     },
