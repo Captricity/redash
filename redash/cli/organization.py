@@ -1,9 +1,35 @@
-from click import argument
+from click import argument, option
 from flask.cli import AppGroup
 
 from redash import models
 
 manager = AppGroup(help="Organization management commands.")
+
+
+@manager.command()
+@argument('name')
+@option('--slug', 'slug', default=None,
+        help="The slug to use to identify the org (leave blank to "
+             "set it to be the same as name).")
+def create(name, slug=None):
+    print "Creating organization (%s)..." % (name)
+
+    if slug is None:
+        slug = name
+    org = models.Organization(name=name, slug=slug, settings={})
+    admin_group = models.Group(
+        name='admin',
+        permissions=['admin', 'super_admin'],
+        org=org,
+        type=models.Group.BUILTIN_GROUP)
+    default_group = models.Group(
+        name='default',
+        permissions=models.Group.DEFAULT_PERMISSIONS,
+        org=org,
+        type=models.Group.BUILTIN_GROUP)
+    models.db.session.add_all([org, admin_group, default_group])
+    models.db.session.commit()
+    print "Created organization (%s) with admin and default groups" % name
 
 
 @manager.command()
