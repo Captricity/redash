@@ -1,6 +1,15 @@
 import moment from 'moment';
 
-function queryResultLink() {
+function queryResultLink(Auth) {
+  function resultLinkQueryParams(scope) {
+    const jwt = Auth.getJwt();
+    if (scope.embed) {
+      return `?api_key=${scope.apiKey}`;
+    } else if (jwt) {
+      return `?jwt=${jwt}`;
+    }
+    return '';
+  }
   return {
     restrict: 'A',
     link(scope, element, attrs) {
@@ -13,7 +22,7 @@ function queryResultLink() {
         if (scope.queryResult.getId() == null) {
           element.attr('href', '');
         } else {
-          element.attr('href', `api/queries/${scope.query.id}/results/${scope.queryResult.getId()}.${fileType}${scope.embed ? `?api_key=${scope.apiKey}` : ''}`);
+          element.attr('href', `api/queries/${scope.query.id}/results/${scope.queryResult.getId()}.${fileType}${resultLinkQueryParams(scope)}`);
           element.attr('download', `${scope.query.name.replace(' ', '_') + moment(scope.queryResult.getUpdatedAt()).format('_YYYY_MM_DD')}.${fileType}`);
         }
       });
@@ -22,5 +31,5 @@ function queryResultLink() {
 }
 
 export default function (ngModule) {
-  ngModule.directive('queryResultLink', queryResultLink);
+  ngModule.directive('queryResultLink', ['Auth', queryResultLink]);
 }

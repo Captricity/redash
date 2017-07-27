@@ -54,7 +54,7 @@ function addPointToSeries(point, seriesCollection, seriesName) {
 }
 
 
-function QueryResultService($resource, $timeout, $q) {
+function QueryResultService($resource, $timeout, $q, Auth) {
   const QueryResultResource = $resource('api/query_results/:id', { id: '@id' }, { post: { method: 'POST' } });
   const Job = $resource('api/jobs/:id', { id: '@id' });
   const statuses = {
@@ -475,8 +475,11 @@ function QueryResultService($resource, $timeout, $q) {
 
     getLink(queryId, fileType, apiKey) {
       let link = `api/queries/${queryId}/results/${this.getId()}.${fileType}`;
+      const jwt = Auth.getJwt();
       if (apiKey) {
         link = `${link}?api_key=${apiKey}`;
+      } else if (jwt) {
+        link = `${link}?jwt=${jwt}`;
       }
       return link;
     }
