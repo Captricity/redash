@@ -48,5 +48,10 @@ def authorize_user(user_info):
 
 
 def load_user_from_jwt(request):
-    user_info = get_user_info_from_authorization(request.headers.get('Authorization', ''))
+    jwt = request.args.get('jwt', None)
+    if jwt is not None:
+        authorization = 'Bearer ' + jwt
+    else:
+        authorization = request.headers.get('Authorization', '')
+    user_info = get_user_info_from_authorization(authorization)
     return authorize_user(user_info)

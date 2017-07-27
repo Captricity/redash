@@ -72,6 +72,9 @@ function AuthService($window, $location, $q, $http) {
     getApiKey() {
       return this.apiKey;
     },
+    getJwt() {
+      return window.sessionStorage.getItem(JWT_ITEM);
+    },
   };
 
   return Auth;
