@@ -1,0 +1,13 @@
+<div class="modal-header">
+    <h4 class="modal-title" ng-if="$ctrl.title">{{$ctrl.title}}</h4>
+</div>
+<div class="modal-body">
+    <label for="dataset-name">Name of dataset</label>
+    <div class="input-group">
+        <input id="dataset-name" type="text" class="form-control" ng-model="name">
+    </div>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-default" ng-click="$ctrl.dismiss()">Cancel</button>
+  <button class="btn btn-primary" ng-click="$ctrl.confirm()">Save</button>
+</div>
