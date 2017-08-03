@@ -15,3 +15,6 @@ export { default as KeyboardShortcuts } from './keyboard-shortcuts';
 export { default as OfflineListener } from './offline-listener';
 export { default as AlertDialog } from './alert-dialog';
 export { default as Auth } from './auth';
+
+// Captricity specific services
+export { default as CapsDatasets } from './caps/dataset';

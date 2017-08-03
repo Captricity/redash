@@ -1,4 +1,5 @@
 /* Utilities for accessing the api */
+import { contains } from 'underscore';
 
 export const API_ROOT = '/redash/';
 
@@ -13,7 +14,17 @@ function httpPrefixInterceptor($q) {
         return config || $q.when(config);
       }
 
-      config.url = API_ROOT + config.url;
+      // If there is no reference to a service, prepend the redash root
+      const EXTERNAL_SERVICES = ['zenodot'];
+      let root;
+      if (url[0] === '/') {
+        root = url.slice(1).split('/')[0];
+      } else {
+        root = url.split('/')[0];
+      }
+      if (!contains(EXTERNAL_SERVICES, root)) {
+        config.url = API_ROOT + url;
+      }
       return config || $q.when(config);
     },
   };
