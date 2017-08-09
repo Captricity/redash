@@ -1,7 +1,7 @@
 import { pick, any, some, find } from 'underscore';
 import template from './query.html';
 
-function QueryViewCtrl($scope, Events, $route, $routeParams, $location, $window, $q,
+function QueryViewCtrl($scope, Events, CapsDatasets, $route, $routeParams, $location, $window, $q,
   KeyboardShortcuts, Title, AlertDialog, Notifications, clientConfig, toastr, $uibModal,
   currentUser, Query, DataSource) {
   const DEFAULT_TAB = 'table';
@@ -202,6 +202,25 @@ function QueryViewCtrl($scope, Events, $route, $routeParams, $location, $window,
     Events.record('toggle_published', 'query', $scope.query.id);
     $scope.query.is_draft = !$scope.query.is_draft;
     $scope.saveQuery(undefined, { is_draft: $scope.query.is_draft });
+  };
+
+  $scope.saveAsDataset = () => {
+    function save(modalScope) {
+      CapsDatasets.create(modalScope.name, $scope.query.query)
+      .then(() => {
+        // TODO (Yori): Redirect to datasets home
+      });
+    }
+
+    const title = 'Save Query as Dataset';
+    $uibModal.open({
+      component: 'datasetCreateModal',
+      resolve: {
+        title: () => title,
+        name: () => $scope.query.name,
+        confirm: () => save,
+      },
+    });
   };
 
   $scope.saveDescription = () => {
