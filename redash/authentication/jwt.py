@@ -25,6 +25,10 @@ def authorize_user(user_info):
     if user_info is None:
         return None
 
+    # Make sure the user has the right permissions
+    if 'user' not in user_info['groups']:
+        return None
+
     email = user_info['email']
     name = user_info['first_name'] + ' ' + user_info['last_name']
     user = models.User.query.filter_by(email=email).first()
