@@ -5,6 +5,7 @@ const logger = debug('redash:auth');
 const SESSION_ITEM = 'session';
 const session = { loaded: false };
 const JWT_ITEM = 'jwt';
+const COUNTDOWN_THRESHOLD = 300;
 
 function storeSession(sessionData) {
   logger('Updating session to be:', sessionData);
@@ -24,7 +25,11 @@ function getLocalSessionData() {
   return session;
 }
 
-function AuthService($window, $location, $q, $http) {
+function AuthService($window, $location, $q, $http, toastr) {
+  const authState = {
+    idleToast: null,
+    countdown: null,
+  };
   const Auth = {
     isAuthenticated() {
       const sessionData = getLocalSessionData();
@@ -43,6 +48,13 @@ function AuthService($window, $location, $q, $http) {
       logger('Logout.');
       window.sessionStorage.removeItem(SESSION_ITEM);
       $window.location.href = 'logout';
+    },
+    keepalive() {
+      logger('requested to keepalive session');
+      return $http.post('/admissions/api/v1/keepalive')
+      .then((response) => {
+        window.sessionStorage.setItem('jwt', response.data.jwt);
+      });
     },
     loadSession() {
       logger('Loading session');
@@ -74,6 +86,52 @@ function AuthService($window, $location, $q, $http) {
     },
     getJwt() {
       return window.sessionStorage.getItem(JWT_ITEM);
+    },
+
+    // Idle event handlers, for autologout UX
+    onIdleEnd() {
+      logger('Idle ended');
+      if (authState.idleToast) {
+        toastr.remove(authState.idleToast.toastId);
+        authState.idleToast = null;
+      }
+    },
+    onSessionTimeout() {
+      logger('User session timed out');
+      if (authState.idleToast) {
+        toastr.remove(authState.idleToast.toastId);
+        authState.idleToast = null;
+      }
+      toastr.error(
+        'Your session has timedout due to inactivity. Login again to continue working.',
+        'Session timedout',
+        {
+          timeOut: null,
+        }
+      );
+    },
+    onSessionTimeoutWarning(e, countdown) {
+      logger('Session timeout countdown:', countdown, 'seconds');
+      if (countdown > COUNTDOWN_THRESHOLD) {
+        // Don't do anything until we are below the threshold
+        return;
+      }
+
+      authState.countdown = countdown;
+      const toastMsg = `Your session will be expired in ${authState.countdown} seconds due to inactivity.`;
+      if (!authState.idleToast) {
+        authState.idleToast = toastr.warning(
+          toastMsg,
+          'Warning',
+          {
+            timeOut: null,
+          }
+        );
+      } else {
+        authState.idleToast.scope.$apply(() => {
+          authState.idleToast.scope.message = toastMsg;
+        });
+      }
     },
   };
 
@@ -132,12 +190,20 @@ export default function (ngModule) {
   ngModule.factory('apiKeyHttpInterceptor', apiKeyHttpInterceptor);
   ngModule.factory('jwtHttpInterceptor', jwtHttpInterceptor);
 
-  ngModule.config(($httpProvider) => {
+  ngModule.config(($httpProvider, IdleProvider, KeepaliveProvider) => {
     $httpProvider.interceptors.push('apiKeyHttpInterceptor');
     $httpProvider.interceptors.push('jwtHttpInterceptor');
+
+    // configure idle warnings
+    // 5 second idling threshold: 5 seconds of inactivity triggers idle state
+    // 15 minute idling timeout
+    // 5 minute keepalive ping interval
+    IdleProvider.idle(5);
+    IdleProvider.timeout(900);
+    KeepaliveProvider.interval(300);
   });
 
-  ngModule.run(($location, $window, $rootScope, $route, Auth) => {
+  ngModule.run(($location, $window, $rootScope, $route, Auth, Idle) => {
     $rootScope.$on('$routeChangeStart', (event, to) => {
       if (to.authenticated && !Auth.isAuthenticated()) {
         logger('Requested authenticated route: ', to);
@@ -152,5 +218,14 @@ export default function (ngModule) {
         });
       }
     });
+
+    // Start the idle watcher
+    Idle.watch();
+    // Register handlers for idle watching events
+    $rootScope.$on('IdleStart', Auth.keepalive.bind(Auth));
+    $rootScope.$on('IdleEnd', Auth.onIdleEnd.bind(Auth));
+    $rootScope.$on('IdleTimeout', Auth.onSessionTimeout.bind(Auth));
+    $rootScope.$on('IdleWarn', Auth.onSessionTimeoutWarning.bind(Auth));
+    $rootScope.$on('Keepalive', Auth.keepalive.bind(Auth));
   });
 }
