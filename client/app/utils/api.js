@@ -15,7 +15,7 @@ function httpPrefixInterceptor($q) {
       }
 
       // If there is no reference to a service, prepend the redash root
-      const EXTERNAL_SERVICES = ['zenodot'];
+      const EXTERNAL_SERVICES = ['zenodot', 'admissions'];
       let root;
       if (url[0] === '/') {
         root = url.slice(1).split('/')[0];

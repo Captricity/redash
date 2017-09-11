@@ -27,6 +27,7 @@ import 'angular-ui-ace';
 import 'angular-resizable';
 import ngGridster from 'angular-gridster';
 import { each } from 'underscore';
+import 'ng-idle';
 
 import './sortable';
 
@@ -49,7 +50,7 @@ const logger = debug('redash');
 
 const requirements = [
   ngRoute, ngResource, ngSanitize, uiBootstrap, ngMessages, uiSelect, 'angularMoment', toastr, 'ui.ace',
-  ngUpload, 'angularResizable', vsRepeat, 'ui.sortable', ngGridster.name,
+  ngUpload, 'angularResizable', vsRepeat, 'ui.sortable', ngGridster.name, 'ngIdle',
 ];
 
 const ngModule = angular.module('app', requirements);
