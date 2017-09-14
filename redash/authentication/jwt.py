@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import jwt
 import requests
 from redash import models
 from redash.authentication.org_resolving import current_org
@@ -21,8 +22,18 @@ def get_user_info_from_authorization(authorization):
     return user_info
 
 
-def authorize_user(user_info):
-    if user_info is None:
+def get_jwt_claims_from_authorization(authorization):
+    encoded_token = authorization.split(' ')[1]
+    # We skip verifying the token, relying on Kong
+    return jwt.decode(encoded_token, verify=False)
+
+
+def authorize_user(user_info, jwt_claims):
+    if user_info is None or jwt_claims is None:
+        return None
+
+    # Make sure the user was authenticated with MFA
+    if ('mfa_verified' not in jwt_claims) or (not jwt_claims['mfa_verified']):
         return None
 
     # Make sure the user has the right permissions
@@ -57,5 +68,6 @@ def load_user_from_jwt(request):
         authorization = 'Bearer ' + jwt
     else:
         authorization = request.headers.get('Authorization', '')
+    jwt_claims = get_jwt_claims_from_authorization(authorization)
     user_info = get_user_info_from_authorization(authorization)
-    return authorize_user(user_info)
+    return authorize_user(user_info, jwt_claims)
