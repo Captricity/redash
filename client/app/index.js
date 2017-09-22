@@ -35,6 +35,9 @@ import './assets/css/superflat_redash.css';
 import './assets/css/redash.css';
 import './assets/css/main.scss';
 
+// Custom css
+import './assets/css/capdash.css';
+
 import * as pages from './pages';
 import * as components from './components';
 import * as filters from './filters';
