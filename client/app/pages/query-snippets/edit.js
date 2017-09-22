@@ -1,9 +1,14 @@
 import 'brace/mode/snippets';
 import template from './edit.html';
 
-function SnippetCtrl($routeParams, $http, $location, toastr, currentUser, Events, QuerySnippet) {
+function SnippetCtrl(
+    $scope, $routeParams, $http, $location, toastr, currentUser, Events, QuerySnippet) {
   this.snippetId = $routeParams.snippetId;
   Events.record('view', 'query_snippet', this.snippetId);
+
+  this.customEditorConfigs = {
+    vimMode: false,
+  };
 
   this.editorOptions = {
     mode: 'snippets',
@@ -16,6 +21,14 @@ function SnippetCtrl($routeParams, $http, $location, toastr, currentUser, Events
       editor.$blockScrolling = Infinity;
       editor.getSession().setUseWrapMode(true);
       editor.setShowPrintMargin(false);
+
+      $scope.toggleVimMode = (vimMode) => {
+        if (vimMode) {
+          editor.setKeyboardHandler('ace/keyboard/vim');
+        } else {
+          editor.setKeyboardHandler();
+        }
+      };
     },
   };
 

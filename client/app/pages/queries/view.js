@@ -118,6 +118,11 @@ function QueryViewCtrl($scope, Events, CapsDatasets, $route, $routeParams, $loca
   $scope.query = $route.current.locals.query;
   $scope.showPermissionsControl = clientConfig.showPermissionsControl;
 
+  $scope.customEditorConfigs = {
+    vimMode: false,
+    liveAutocompletion: true,
+  };
+
   const shortcuts = {
     'mod+enter': $scope.executeQuery,
   };

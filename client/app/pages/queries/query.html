@@ -103,6 +103,25 @@
               <select ng-disabled="!isQueryOwner" ng-model="query.data_source_id" ng-change="updateDataSource()"
                       ng-options="ds.id as ds.name for ds in dataSources"></select>
 
+              <!-- CAPTRICITY CUSTOMIZATION -->
+              <div class="editor-config-checkbox form-check form-check-inline">
+                <label class="form-check-label">
+                  <input class="form-check-input"
+                         type="checkbox"
+                         id="editor-vim-mode"
+                         ng-model="customEditorConfigs.vimMode"> Vim Mode
+                </label>
+              </div>
+              <div class="editor-config-checkbox form-check form-check-inline">
+                <label class="form-check-label">
+                  <input class="form-check-input"
+                         type="checkbox"
+                         id="editor-live-autocomplete"
+                         ng-model="customEditorConfigs.liveAutocompletion"> Live Autocompletion
+                </label>
+              </div>
+              <!-- END CAPTRICITY CUSTOMIZATION -->
+
               <div class="pull-right">
                 <button class="btn btn-s btn-default" ng-click="togglePublished()" ng-if="query.is_draft && query.id != undefined && (isQueryOwner || currentUser.hasPermission('admin'))">
                   <span class="fa fa-paper-plane"></span> Publish
@@ -131,7 +150,8 @@
             <p style="height:calc(100% - 40px);">
               <query-editor query="query"
                             schema="schema"
-                            syntax="dataSource.syntax"></query-editor>
+                            syntax="dataSource.syntax"
+                            custom-editor-configs="customEditorConfigs"></query-editor>
             </p>
         </div>
       </div>

@@ -3,6 +3,7 @@ import 'brace/mode/python';
 import 'brace/mode/sql';
 import 'brace/mode/json';
 import 'brace/ext/language_tools';
+import 'brace/keybinding/vim';
 import { map } from 'underscore';
 
 // By default Ace will try to load snippet files for the different modes and fail.
@@ -25,6 +26,7 @@ function queryEditor(QuerySnippet) {
       query: '=',
       schema: '=',
       syntax: '=',
+      customEditorConfigs: '=',
     },
     template: '<div ui-ace="editorOptions" ng-model="query.query"></div>',
     link: {
@@ -38,7 +40,7 @@ function queryEditor(QuerySnippet) {
             behavioursEnabled: true,
             enableSnippets: true,
             enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
+            enableLiveAutocompletion: $scope.customEditorConfigs.liveAutocompletion,
             autoScrollEditorIntoView: true,
           },
           onLoad(editor) {
@@ -77,11 +79,25 @@ function queryEditor(QuerySnippet) {
                 // If there are too many tokens we disable live autocomplete,
                 // as it makes typing slower.
                 if (tokensCount > 5000) {
-                  editor.setOption('enableLiveAutocompletion', false);
+                  editor.setOption({ enableLiveAutocompletion: false });
                 } else {
-                  editor.setOption('enableLiveAutocompletion', true);
+                  editor.setOption({
+                    enableLiveAutocompletion: $scope.customEditorConfigs.liveAutocompletion,
+                  });
                 }
               }
+            });
+
+            $scope.$watch('customEditorConfigs.vimMode', (vimMode) => {
+              if (vimMode) {
+                editor.setKeyboardHandler('ace/keyboard/vim');
+              } else {
+                editor.setKeyboardHandler();
+              }
+            });
+
+            $scope.$watch('customEditorConfigs.liveAutocompletion', (liveAutocompletion) => {
+              editor.setOptions({ enableLiveAutocompletion: liveAutocompletion });
             });
 
             $scope.$parent.$on('angular-resizable.resizing', () => {
