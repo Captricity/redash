@@ -27,6 +27,8 @@ function queryEditor(QuerySnippet) {
       schema: '=',
       syntax: '=',
       customEditorConfigs: '=',
+      saveQuery: '&',
+      executeQuery: '&',
     },
     template: '<div ui-ace="editorOptions" ng-model="query.query"></div>',
     link: {
@@ -144,6 +146,18 @@ function queryEditor(QuerySnippet) {
 
         window.ace.acequire(['ace/ext/language_tools'], (langTools) => {
           langTools.addCompleter(schemaCompleter);
+        });
+
+        const saveQuery = $scope.saveQuery();
+        const executeQuery = $scope.executeQuery();
+        window.ace.config.loadModule('ace/keyboard/vim', (module) => {
+          const VimApi = module.CodeMirror.Vim;
+          VimApi.defineEx('write', 'w', () => {
+            saveQuery();
+          });
+          VimApi.defineEx('run', 'r', () => {
+            executeQuery();
+          });
         });
       },
     },
